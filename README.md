@@ -31,12 +31,29 @@ more about guaranteeing each run always produces binary identical files.
 If you don't need such guarantee (e.g. realtime communication), then you
 don't need this fork.
 
+## Is the ffmpeg output deterministic across OSes?
+
+I've tested ffmpeg on Linux Ubuntu 20.04 and macOS Catalina (x86).
+
+Both generate the exact same output only if `-bitexact` is passed to ffmpeg.
+
+If `-bitexact` is not used; multiple runs generate the same output; but the
+OSes generate different file outputs.
+
 # How to use this fix?
 
 You need to compile this fork, and then replace the DLLs / so which ffmpeg
 is linking against.
 
 I've only tested this on Ubuntu, but it should work on any OS.
+
+# Do you provide prebuilt libs?
+
+Yes, for macOS and Linux.
+
+See the [Releases section](https://github.com/darksylinc/soxr/releases).
+
+# Compiling
 
 ## Compiling the project on Linux
 
@@ -55,8 +72,28 @@ If successfully the following files should be under `soxr/build/Release/src`:
  - libsoxr-lsr.so
  - libsoxr-lsr.so.0
  - libsoxr-lsr.so.0.1.9
- 
-## Patching ffmpeg
+
+## Compiling the project on macOS
+
+```bash
+mkdir -p build/Release
+cd build/Release
+cmake ../../ -DCMAKE_BUILD_TYPE=Release -GXcode
+cmake --build . --target ALL_BUILD --config Release
+```
+
+If successfully the following files should be under `soxr/build/Release/src/Release`:
+
+ - libsoxr.0.1.2.dylib
+ - libsoxr.0.dylib
+ - libsoxr.dylib
+ - libsoxr-lsr.0.1.9.dylib
+ - libsoxr-lsr.0.dylib
+ - libsoxr-lsr.dylib
+
+# Patching
+
+## Patching ffmpeg on Linux
 
 On Linux you can use `LD_LIBRARY_PATH` to inject this version of libsoxr
 instead of using the system one:
@@ -66,7 +103,41 @@ export LD_LIBRARY_PATH=/path/to/soxr/build/Release/src
 ffmpeg -i input.wav -af aresample=48000:resampler=soxr:precision=28 -c:a pcm_s16le output.wav
 ```
 
+## Patching ffmpeg on macOS
+
+The [main project](https://ffmpeg.org/download.html#build-mac) distributes
+static builds. That won't work.
+
+You can use the brew version:
+
+```bash
+brew install ffmpeg
+```
+
+### If SIP is disabled
+
+You can use `DYLD_LIBRARY_PATH` to inject this version of libsoxr
+instead of using the system one:
+
+```bash
+export DYLD_LIBRARY_PATH=/path/to/soxr/build/Release/src
+ffmpeg -i input.wav -af aresample=48000:resampler=soxr:precision=28 -c:a pcm_s16le output.wav
+```
+
+Be careful as SIP (System Integrity Protection) may override your
+`DYLD_LIBRARY_PATH`.
+
+### If SIP is enabled
+
+Just go nuclear and overwrite the dylib files under
+`/usr/local/Cellar/libsoxr/0.1.3/lib/` which were installed by brew.
+
+## Patching ffmpeg on Windows
+
 On Windows, copy pasting the DLLs on top of ffmpeg's should work.
+But you need the download the **shared** version, not the static one.
+
+But it doesn't seem like there is a soxr DLL? Sorry, I didn't check.
 
 # Original Readme
 
