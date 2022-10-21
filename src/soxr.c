@@ -428,7 +428,8 @@ soxr_t soxr_create(
     p->io_spec.scale *= datatype_full_scale[p->io_spec.otype & 3] /
                         datatype_full_scale[p->io_spec.itype & 3];
 
-    p->seed = (unsigned long)time(0) ^ (unsigned long)(size_t)p;
+    // p->seed = (unsigned long)time(0) ^ (unsigned long)(size_t)p;
+    p->seed = (unsigned long)0x8EFF8E97452367FD;  // chosen by fair dice roll. guaranteed to be random.
 
 #if WITH_CR32 || WITH_CR32S || WITH_VR32
     if (0
