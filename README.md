@@ -51,7 +51,7 @@ I've only tested this on Ubuntu, but it should work on any OS.
 
 Yes, for macOS and Linux.
 
-See the [Releases section](https://github.com/darksylinc/soxr/releases).
+See the [Downloads](https://github.com/darksylinc/soxr/releases) in the [Releases section](https://github.com/darksylinc/soxr/releases).
 
 # Compiling
 
